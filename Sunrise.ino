@@ -499,15 +499,6 @@ void recalcPosition2(long Jdiff, byte eventIndex) {
   float h_rad = calc_h_rad(event[eventIndex].delta_rad, H_rad, La_rad);
   event[eventIndex].h = h_rad * 180.0 / PI;
 
-/*  if (printAll) {
-    Serial.print(F("eventType: ")); Serial.println(event[Noon].eventType);
-    Serial.print(F("Jfraction: ")); Serial.println(event[Noon].Jfract, 6);
-    Serial.print(F("lambda_sun (degrees: ")); Serial.println(event[Noon].lambdaSun, 6);
-    Serial.print(F("delta_sun (degrees: ")); Serial.println(event[Noon].delta_rad * 180.0 / PI, 6);
-    Serial.print(F("H (degrees: ")); Serial.println(event[Noon].H, 6);
-    Serial.print(F("A (degrees: ")); Serial.println(event[Noon].A, 6);
-    Serial.print(F("h (degrees: ")); Serial.println(event[Noon].h, 6);
-  }*/
   if (printAll && event[eventIndex].eventType != wholeHour) {
     Serial.print(F("\teventType: ")); Serial.println(event[eventIndex].eventType);
     Serial.print(F("\tJfract ")); Serial.println(event[eventIndex].Jfract, 6);
@@ -522,55 +513,6 @@ void recalcPosition2(long Jdiff, byte eventIndex) {
     Serial.print(F("\th      ")); Serial.println(event[eventIndex].h, 6);
     Serial.println();
   }
-}
-
-/*void recalcPosition(long Jdiff, float Jfraction, float *destination) {
-  float M = calcM( Jdiff, Jfraction );
-  float M_rad = M * PI / 180.0;   // in rad
-  float C = calcC(M_rad);
-  float lambdaSun = calcLambdaSun(M, C);
-  float lambdaSun_rad = lambdaSun * PI / 180.0;
-  float delta_rad = calcDelta_rad (lambdaSun_rad);
-  float delta = delta_rad * 180.0 / PI;
-  float alpha_rad = calcAlpha_rad (lambdaSun_rad);
-  float alpha = alpha_rad * 180.0 / PI;
-  float theta = calcTheta( Jdiff, Jfraction);
-  float H = calcH(theta, alpha);
-  float H_rad = H * PI / 180.0;
-  float A_rad = calcA_rad(H_rad, delta_rad, La_rad);
-  float A = A_rad * 180.0 / PI;
-  float h_rad = calc_h_rad(delta_rad, H_rad, La_rad);
-  float h = h_rad * 180.0 / PI;
-  destination[0] = H;
-  destination[1] = A;
-  destination[2] = h;
-  destination[3] = delta_rad;
-
-  if (debug) {
-    Serial.print("Jfract "); Serial.println(Jfraction, 6);
-    Serial.print("M      "); Serial.println(M, 6);
-    Serial.print("C      "); Serial.println(C, 6);
-    Serial.print("lambda "); Serial.println(lambdaSun, 6);
-    Serial.print("delta  "); Serial.println(delta, 6);
-    Serial.print("alpha  "); Serial.println(alpha, 6);
-    Serial.print("theta  "); Serial.println(theta, 6);
-    Serial.print("H      "); Serial.println(H, 6);
-    Serial.print("A      "); Serial.println(A, 6);
-    Serial.print("h      "); Serial.println(h, 6);
-  }
-}*/
-
-float recalcH(long Jdiff, float Jfraction) {
-  // output in degrees
-  float M = calcM( Jdiff, Jfraction );
-  float M_rad = M * PI / 180.0;   // in rad
-  float C = calcC(M_rad);
-  float lambdaSun = calcLambdaSun(M, C);
-  float lambdaSun_rad = lambdaSun * PI / 180.0;
-  float alpha_rad = calcAlpha_rad (lambdaSun_rad);
-  float alpha = alpha_rad * 180.0 / PI;
-  float theta = calcTheta( Jdiff, Jfraction);
-  return calcH(theta, alpha);
 }
 
 float calcHt(float delta_rad_sun) {
@@ -895,30 +837,10 @@ void sortEvents() {
   for (byte pass = nrEvents - 2; pass > 0; pass--) {
     for (byte i = 0; i < pass; i++) {
       if (event[i].Jfract > event[i+1].Jfract) {
-        // swap order
-        swap.eventType  = event[i].eventType;
-        swap.Jfract     = event[i].Jfract;
-        swap.H          = event[i].H;
-        swap.A          = event[i].A;
-        swap.h          = event[i].h;
-        swap.delta_rad  = event[i].delta_rad;
-        swap.lambdaSun  = event[i].lambdaSun;
-        
-        event[i].eventType  = event[i+1].eventType;
-        event[i].Jfract     = event[i+1].Jfract;
-        event[i].H          = event[i+1].H;
-        event[i].A          = event[i+1].A;
-        event[i].h          = event[i+1].h;
-        event[i].delta_rad  = event[i+1].delta_rad;
-        event[i].lambdaSun  = event[i+1].lambdaSun;
-
-        event[i+1].eventType  = swap.eventType;
-        event[i+1].Jfract     = swap.Jfract;
-        event[i+1].H          = swap.H;
-        event[i+1].A          = swap.A;
-        event[i+1].h          = swap.h;
-        event[i+1].delta_rad  = swap.delta_rad;
-        event[i+1].lambdaSun  = swap.lambdaSun;
+        // swap event[i] and event[i+1]
+        swap = event[i];
+        event[i] = event[i+1];
+        event[i+1] = swap;
       }
     }
   }
